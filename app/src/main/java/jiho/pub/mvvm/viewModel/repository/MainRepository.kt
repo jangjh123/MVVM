@@ -1,49 +1,27 @@
 package jiho.pub.mvvm.viewModel.repository
 
-import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.room.CoroutinesRoom
+import androidx.annotation.WorkerThread
 import jiho.pub.mvvm.model.data.Post
+import jiho.pub.mvvm.model.external.RetrofitClient
 import jiho.pub.mvvm.model.internal.PostDao
 import kotlinx.coroutines.*
-import kotlinx.coroutines.GlobalScope.coroutineContext
+import okhttp3.internal.wait
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 
-// coroutine -> coroutine flow will be migrated
+@WorkerThread
+class MainRepository @Inject constructor(
+    private val postDao: PostDao
+) {
+    suspend fun getAllPost(): List<Post> = postDao.getAllPost()
 
-class MainRepository @Inject constructor(private val postDao: PostDao, dispatcher: CoroutineDispatcher) {
-    // Repository 는 하나만 있어도 될듯 (어차피 데이터 없음)
-    private val scope = CoroutineScope(dispatcher)
-    private lateinit var list: List<Post>
-    private lateinit var post: Post
-
-    fun getAllPost(): List<Post> {
-
-        runBlocking {
-            list = postDao.getAllPost()
-        }
-        return list
+    suspend fun addPost(post: Post) {
+        postDao.insert(post)
     }
 
-    fun addPost(post: Post) {
-        runBlocking {
-            postDao.insert(post)
-        }
+    suspend fun searchPost(id: Int): Post = postDao.searchPost(id)
+
+    suspend fun deletePost(post: Post) {
+        postDao.delete(post)
     }
 
-    fun searchPost(id: Int): Post {
-        runBlocking {
-            post = postDao.findById(id)
-        }
-        return post
-    }
-
-    fun deletePost(post: Post) {
-        runBlocking {
-            postDao.delete(post)
-        }
-    }
 }

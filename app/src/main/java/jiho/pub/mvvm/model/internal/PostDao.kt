@@ -13,7 +13,7 @@ interface PostDao {
     suspend fun getAllPost(): List<Post>
 
     @Query("SELECT * FROM post WHERE id LIKE :id")
-    suspend fun findById(id: Int): Post
+    suspend fun searchPost(id: Int): Post
 
     @Insert
     suspend fun insert(post: Post)

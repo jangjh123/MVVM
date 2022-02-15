@@ -2,12 +2,14 @@ package jiho.pub.mvvm.view.viewComponent
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 import jiho.pub.mvvm.databinding.ItemPostBinding
+import jiho.pub.mvvm.model.data.Match
 import jiho.pub.mvvm.model.data.Post
 
 class PostAdapter :
-    androidx.recyclerview.widget.ListAdapter<Post, RecyclerView.ViewHolder>(PostDiffUtil()) {
+    androidx.recyclerview.widget.ListAdapter<Post, RecyclerView.ViewHolder>(GenericDiffUtil()) {
 
     private lateinit var mClickListener: PostClickListener
 
@@ -29,6 +31,10 @@ class PostAdapter :
 
     fun submit(list: List<Post>) {
         submitList(list.toMutableList())
+    }
+
+    fun setItem(list: List<Post>) {
+
     }
 
     inner class ViewHolder(private val binding: ItemPostBinding) :

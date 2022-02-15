@@ -1,8 +1,10 @@
 package jiho.pub.mvvm.view
 
+import android.content.Intent
 import android.util.Log
 import android.widget.LinearLayout
 import androidx.activity.viewModels
+import androidx.databinding.Bindable
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -14,6 +16,10 @@ import jiho.pub.mvvm.databinding.ActivityMainBinding
 import jiho.pub.mvvm.model.data.Post
 import jiho.pub.mvvm.view.viewComponent.PostAdapter
 import jiho.pub.mvvm.viewModel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -24,9 +30,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     override fun init() {
         super.init()
 
+        binding()
         setObservers()
         initPostRecyclerView()
         onClick()
+    }
+
+    private fun binding() {
+        binding.adapter = adapter
     }
 
     private fun onClick() {
@@ -38,15 +49,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
         binding.buttonSearch.setOnClickListener {
             if (binding.editTextSearch.text.toString().isNotEmpty()) {
-                val post = viewModel.searchPost(binding.editTextSearch.text.toString().toInt())
-                binding.editTextSearch.setText("")
-                post.let { it1 ->
-                    Snackbar.make(
-                        binding.root,
-                        it1.title,
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-                }
+                viewModel.searchPost(binding.editTextSearch.text.toString().toInt())
+            } else {
+                val intent = Intent(this, MainActivity2::class.java)
+                startActivity(intent)
             }
         }
 
@@ -63,18 +69,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private fun setObservers() {
-        val postObserver: Observer<List<Post>> = Observer {
-            adapter.submit(it)
+        val postObserver: Observer<Post> = Observer {
+            Snackbar.make(binding.root, it.title, Snackbar.LENGTH_SHORT).show()
         }
-        viewModel.getPostList().observe(this, postObserver)
+        viewModel.getPost().observe(this, postObserver)
     }
 
     private fun initPostRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
-        viewModel.getAllPost()
     }
 }
-
-// 코루틴 스코프 고찰
-// onConflictStrategy ?
